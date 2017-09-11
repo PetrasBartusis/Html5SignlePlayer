@@ -1,0 +1,52 @@
+<canvas id="ctx" width="500" height="500" style="border:4px solid #000000;"></canvas>
+
+<script>
+var ctx = document.getElementById("ctx").getContext("2d");
+ctx.font = '30px Arial';
+
+var HEIGHT = 500;
+var WIDTH = 500;
+var message = 'Bouncing';
+
+//player
+var player = {
+	x:50,
+	spdX:30,
+	y:40,
+	spdY:5,
+	name:'P',
+};
+
+//enemy
+var enemy = {
+	x:150,
+	spdX:10,
+	y:350,
+	spdY:15,
+	name:'E',
+};
+
+setInterval(update,40);
+
+function updateEntity(something){
+	something.x += something.spdX;
+	something.y += something.spdY;
+	ctx.fillText(something.name, something.x, something.y);
+	
+	if(something.x < 0 || something.x > WIDTH){
+		console.log(message);
+		something.spdX = -something.spdX;
+	}
+	if(something.y < 0 || something.y > HEIGHT){
+		console.log(message);
+		something.spdY = -something.spdY;
+	}
+}
+
+function update(){
+	updateEntity(player);
+	updateEntity(enemy);
+}
+
+
+</script>
