@@ -1,5 +1,5 @@
 <canvas id="ctx" width="500" height="500" style="border:4px solid #000000;"></canvas>
-
+<script src="js/Entities.js"></script>
 <script>
 var ctx = document.getElementById("ctx").getContext("2d");
 ctx.font = '30px Arial';
@@ -12,175 +12,19 @@ var score = 0;
 
 var frameCount = 0;
 
-//player
-var player;
-
-Entity = function(type,id,x,y,spdX,spdY,width,height,color){
-	var self = {
-		type:type,
-		x:x,
-		spdX:spdX,
-		y:y,
-		spdY:spdY,
-		width:width,
-		height:height,
-		color:color,
-	}
-	self.update = function(){
-		self.updatePosition();
-		self.draw();
-	}
-	
-	self.updatePosition = function(){
-		if(self.type === 'player'){
-			if(self.pressingRight)
-				self.x += 10;
-			if(self.pressingLeft)
-				self.x -= 10;
-			if(self.pressingDown)
-				self.y += 10;
-			if(self.pressingUp)
-				self.y -= 10;
-				
-			//ispositionvalid
-			if(self.x < self.width/2)
-				self.x = self.width/2;
-			if(self.x > WIDTH - self.width/2)
-				self.x = WIDTH - self.width/2;
-			if(self.y < self.height/2)
-				self.y = self.height/2;
-			if(self.y > HEIGHT - self.height/2)
-				self.y = HEIGHT - self.height/2;
-		} else {
-			self.x += self.spdX;
-			self.y += self.spdY;
-			
-			if(self.x < 0 || self.x > WIDTH){
-				self.spdX = -self.spdX;
-			}
-			if(self.y < 0 || self.y > HEIGHT){
-				self.spdY = -self.spdY;
-			}
-		}
-	}
-	
-	self.getDistanceBetweenEntity = function(entity2){
-		var vx = self.x - entity2.x;
-		var vy = self.y - entity2.y;
-		return Math.sqrt(vx*vx*+vy*vy);
-	}
-
-	self.testCollisionEntity = function(entity2){
-		var rect1 = {
-			x:self.x-self.width/2,
-			y:self.y-self.height/2,
-			width:self.width,
-			height:self.height,
-		}
-		var rect2 = {
-			x:entity2.x-entity2.width/2,
-			y:entity2.y-entity2.height/2,
-			width:entity2.width,
-			height:entity2.height,
-		}
-		return testCollisionRectRect(rect1, rect2);
-	}
-	
-	self.draw = function(){
-		ctx.save();
-		ctx.fillStyle = self.color;
-		ctx.fillRect(self.x-self.width/2, self.y-self.height/2,self.width,self.height);
-		ctx.restore();
-	}
-	//self.update();
-	return self;
-}
-
-createPlayer = function(){
-	var self = Entity('player', 'myId',50,40,30,5,20,20,'green');
-	self.hp = 10;
-	self.attackSpeed = 1;
-	self.attackCounter = 0;
-	self.pressingDown = false;
-	self.pressingUp = false;
-	self.pressingLeft = false;
-	self.pressingRight = false;
-	self.aimAngle = 0;
-	player = self;
-}
-
-var enemyList = {};
-var upgradeList = {};
-var bulletList = {};
-
-
-
-Enemy = function Enemy(id, x, y, spdX, spdY,width, height){
-	var self = Entity('enemy', id, x, y, spdX, spdY,width, height,'red');
-	self.hp = 10;
-	self.aimAngle = 0;
-	self.attackSpeed = 1;
-	self.attackCounter = 0;
-
-	enemyList[id] = self;
-}
-randomlyGenerateEnemy = function(){
-	var x = Math.random() * WIDTH;
-	var y = Math.random() * HEIGHT;
-	var height = 10 + Math.random() * 30;
-	var width = 10 + Math.random() * 30;
-	var id = Math.random();
-	var spdX = 5 + Math.random() * 5;
-	var spdY = 5 + Math.random() * 5;
-	Enemy(id,x,y,spdX,spdY,width,height);
-}
-
-Upgrade = function Upgrade(id, x, y, spdX, spdY,width, height, category, color){
-	var self = Entity('upgrade', id, x, y, spdX, spdY,width, height,color);
-	self.category = category,
-	upgradeList[id] = self;
-}
-randomlyGenerateUpgrade = function(){
-	var x = Math.random() * WIDTH;
-	var y = Math.random() * HEIGHT;
-	var height = 10;
-	var width = 10;
-	var id = Math.random();
-	var spdX = 0;
-	var spdY = 0;
-	var category;
-	var color;
-	if(Math.random()<0.5){
-		category = 'score';
-		color = 'orange'
-	} else {
-		category = 'attackSpeed';
-		color = 'purple';
-	}
-	
-	Upgrade(id, x, y, spdX, spdY, width, height, category, color);
-}
-
-Bullet = function Bullet(id, x, y, spdX, spdY,width, height){
-	var self = Entity('bullet', id, x, y, spdX, spdY,width, height,'black');
-	self.timer = 0;
-	bulletList[id] = self;
-}
-generateBullet = function(actor, overwriteAngle){
-	var x = actor.x;
-	var y = actor.y;
-	var height = 10;
-	var width = 10;
-	var id = Math.random();
-	
-	var angle = actor.aimAngle;
-	if(overwriteAngle !== undefined){
-		angle = overwriteAngle;
-	}
-	var spdX = Math.cos(angle/180*Math.PI) * 5;
-	var spdY = Math.sin(angle/180*Math.PI) * 5;
-	Bullet(id,x,y,spdX,spdY,width,height);
-}
+var Img = {};
+Img.player = new Image();
+Img.player.src = "img/player.png";
+Img.enemy = new Image();
+Img.enemy.src = "img/bat.png";
+Img.bullet = new Image();
+Img.bullet.src = "img/bullet.png";
+Img.upgrade1 = new Image();
+Img.upgrade1.src = "img/upgrade1.png";
+Img.upgrade2 = new Image();
+Img.upgrade2.src = "img/upgrade2.png";
+Img.map = new Image();
+Img.map.src = "img/map.png";
 
 document.onmousemove = function(mouse){ 
 	//get angle based on player position and the mouse
@@ -193,29 +37,17 @@ document.onmousemove = function(mouse){
 }
 
 document.onclick = function(mouse){// onleftclick
-	performAttack(player);
+	player.performAttack();
 }
 
-performAttack = function(actor){
-	if(player.attackCounter > 25){
-		generateBullet(player);
-		player.attackCounter = 0;
-	}
-}
+
 
 document.oncontextmenu = function(mouse){ // onrightclick
-	performSpecialAttack(player);
+	player.performSpecialAttack();
 	mouse.preventDefault();
 }
 
-performSpecialAttack = function(actor){
-	if(actor.attackCounter > 50){
-		generateBullet(actor, actor.aimAngle-5);
-		generateBullet(actor, actor.aimAngle);
-		generateBullet(actor, actor.aimAngle+5);
-		actor.attackCounter = 0;
-	}
-}
+
 
 
 
@@ -268,65 +100,28 @@ update = function (){
 	//every 3 seconds
 	if(frameCount % 75 === 0)
 		randomlyGenerateUpgrade();
-	
-	player.attackCounter += player.attackSpeed;
-	
 		
 	for(var key in bulletList){
 		bulletList[key].update();
-
-		var toRemove = false;
-		bulletList[key].timer++;
-		if(bulletList[key].timer > 100){
-			toRemove = true;
-		}
-		for(var key2 in enemyList){
-			var isColliding = bulletList[key].testCollisionEntity(enemyList[key2]);
-			if(isColliding){
-				toRemove = true;
-				delete enemyList[key2];
-				break;
-			}
-		}
-		if(toRemove){
-			delete bulletList[key];
-		}
-		
 	}
 		
 	for(var key in upgradeList){
 		upgradeList[key].update();
-		var isColliding = player.testCollisionEntity(upgradeList[key]);
-		if(isColliding){
-			if(upgradeList[key].category === 'score'){
-				score += 1000;
-			} else if(upgradeList[key].category === 'attackSpeed') {
-				player.attackSpeed += 3;
-			}
-			delete upgradeList[key];
-		}
 	}
 	
 	for(var key in enemyList){
 		enemyList[key].update();
-		var isColliding = player.testCollisionEntity(enemyList[key]);
-		if(isColliding){
-			player.hp--;
-		}
 	}
-	if(player.hp <= 0)
-	{
-		var timeSurvived = Date.now() - timeWhenGameStarted;
-		console.log("You lost!" + timeSurvived + " ms.");
-		startNewGame();
-	}
+	
+	
 	player.update();
+	
 	ctx.fillText(player.hp + " HP",0,30);
 	ctx.fillText('Score: ' + score,200,30);
 }
 
 
-createPlayer();
+player = Player();
 startNewGame = function(){
 	player.hp = 10;
 	timeWhenGameStarted = Date.now();
